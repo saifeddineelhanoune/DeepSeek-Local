@@ -1,15 +1,17 @@
 #!/bin/bash
 
-docker run --runtime nvidia --gpus all \
-	--name vllm_container \
-	-v ~/.cache/huggingface:/root/.cachehuggingface \
-	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \
-	-p 8000:8000 \
-	--ipc=host \ 
-	vllm/vllm-openai:latest \
-	--model deepseek-ai/DeepSeek-R1
+pip install vllm
 
-sleep 5
+vllm serve "deepseek-ai/DeepSeek-R1-Zero"
 
-docker exec -it vllm_container bash -c "vllm serve deepseek-ai/DeepSeek-R1"
-
+curl -X POST "http://localhost:8000/v1/chat/completions" \
+	-H "Content-type: application/json" \
+	--data '{
+		"model": "deepseek-ai/DeepSeek-R1-Zero",
+		"messages": [
+			{
+				"role": "user",
+				"content": "What is the capital of France?"
+			}
+		]
+	}'
